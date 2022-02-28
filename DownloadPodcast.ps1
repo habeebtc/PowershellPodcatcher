@@ -18,10 +18,7 @@ if(test-path -Path "$($env:TEMP)\tempfile.xml")
 }
 
 invoke-webrequest -uri $uri -OutFile "$($env:TEMP)\tempfile.xml"
-
 $xmlfile = [xml](get-content "$($env:TEMP)\tempfile.xml")
-
-$namespaces = @{itunes = "http://www.itunes.com/dtds/podcast-1.0.dtd"}
 
 try
 {
@@ -54,6 +51,7 @@ try
 }
 catch
 {
+    #Helps highlight if there's issues due to filename normalization or other schema issues
     Write-Output $_
      "filepath: $filepath"
 }
