@@ -18,21 +18,33 @@ if(test-path -Path "$($env:TEMP)\tempfile.xml")
 }
 
 invoke-webrequest -uri $uri -OutFile "$($env:TEMP)\tempfile.xml"
+
 $xmlfile = [xml](get-content "$($env:TEMP)\tempfile.xml")
 
 try
 {
     foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
     {
-        #The below check deals with the apple store namespace which if populated puts 2 title records in the xpath results
+        #get file extension
+		$len = ($item.Node.enclosure.url.split("?")[0]).length
+		$ext = $item.Node.enclosure.url.split("?")[0].substring($len - 3,3)
         if($item.node.title.count -gt 1)
         {
-            $filepath = "$outputfolder\$(normalizeFilename($item.node.title[0])).mp3"
+			$titlenode = $item.node.title[0]
         }
         else
         {
-            $filepath = "$outputfolder\$(normalizeFilename($item.node.title)).mp3"
+			$titlenode = $item.node.title
         }
+		
+		if($titlenode.innertext -ne $null)
+		{
+			$filepath = "$outputfolder\$(normalizeFilename($titlenode.innertext)).$ext"
+		}
+		else
+		{
+			$filepath = "$outputfolder\$(normalizeFilename($item.node.title)).$ext"
+		}
         
         if($false -eq (test-path $filepath -IsValid))  
         {
@@ -51,7 +63,6 @@ try
 }
 catch
 {
-    #Helps highlight if there's issues due to filename normalization or other schema issues
     Write-Output $_
      "filepath: $filepath"
 }
