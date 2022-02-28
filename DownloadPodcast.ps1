@@ -1,4 +1,4 @@
-﻿param ([string]$uri, [string]$outputfolder)
+param ([string]$uri, [string]$outputfolder)
 
 if(test-path -Path "$($env:TEMP)\tempfile.xml")
 {
@@ -8,10 +8,49 @@ if(test-path -Path "$($env:TEMP)\tempfile.xml")
 invoke-webrequest -uri $uri -OutFile "$($env:TEMP)\tempfile.xml"
 
 $xmlfile = [xml](get-content "$($env:TEMP)\tempfile.xml")
-
-
-foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
+try
 {
-    $filepath = "$outputfolder\$($item.node.title).mp3".replace("|","-")
-    invoke-webrequest -uri $item.Node.enclosure.url -outfile $filepath
+    foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
+    {
+        
+        if($item.node.title.count -gt 1)
+        {
+            $filepath = "$outputfolder\$(normalizeFilename($item.node.title[0])).mp3"
+        }
+        else
+        {
+            $filepath = "$outputfolder\$(normalizeFilename($item.node.title)).mp3"
+        }
+        
+        if($false -eq (test-path $filepath -IsValid))  
+        {
+            write-output "path invalid!"
+            $filepath
+        }
+        else
+        {
+            #simplest possible download management: don't download if file exists
+            if($false -eq (test-path $filepath))
+            {
+                invoke-webrequest -uri $item.Node.enclosure.url -outfile $filepath
+            }
+        }
+    }
+}
+catch
+{
+    write-output "exception hit $($_.message)"
+     "filepath: $filepath"
+}
+
+function normalizeFilename([string]$filename)
+{
+    $filename = $filename.Replace("|","-")
+    $filename = $filename.Replace("`"","'")
+    $filename = $filename.Replace("\","-")
+    $filename = $filename.Replace("/","-")
+    $filename = $filename.Replace(":","-")
+    $filename = $filename.Replace(">","}")
+    $filename = $filename.Replace("<","{")
+    return $filename
 }
