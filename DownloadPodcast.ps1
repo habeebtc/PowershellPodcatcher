@@ -26,25 +26,25 @@ try
     foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
     {
         #get file extension
-		$len = ($item.Node.enclosure.url.split("?")[0]).length
-		$ext = $item.Node.enclosure.url.split("?")[0].substring($len - 3,3)
+        $len = ($item.Node.enclosure.url.split("?")[0]).length
+        $ext = $item.Node.enclosure.url.split("?")[0].substring($len - 3,3)
         if($item.node.title.count -gt 1)
         {
-			$titlenode = $item.node.title[0]
+            $titlenode = $item.node.title[0]
         }
         else
         {
-			$titlenode = $item.node.title
+             $titlenode = $item.node.title
         }
 		
-		if($titlenode.innertext -ne $null)
-		{
-			$filepath = "$outputfolder\$(normalizeFilename($titlenode.innertext)).$ext"
-		}
-		else
-		{
-			$filepath = "$outputfolder\$(normalizeFilename($item.node.title)).$ext"
-		}
+        if($titlenode.innertext -ne $null)
+        {
+              $filepath = "$outputfolder\$(normalizeFilename($titlenode.innertext)).$ext"
+        }
+        else
+        {
+              $filepath = "$outputfolder\$(normalizeFilename($item.node.title)).$ext"
+        }
         
         if($false -eq (test-path $filepath -IsValid))  
         {
