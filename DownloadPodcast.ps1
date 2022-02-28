@@ -1,5 +1,17 @@
 param ([string]$uri, [string]$outputfolder)
 
+function normalizeFilename([string]$filename)
+{
+    $filename = $filename.Replace("|","-")
+    $filename = $filename.Replace("`"","'")
+    $filename = $filename.Replace("\","-")
+    $filename = $filename.Replace("/","-")
+    $filename = $filename.Replace(":","-")
+    $filename = $filename.Replace(">","}")
+    $filename = $filename.Replace("<","{")
+    return $filename
+}
+
 if(test-path -Path "$($env:TEMP)\tempfile.xml")
 {
     remove-item -LiteralPath "$($env:TEMP)\tempfile.xml"
@@ -8,6 +20,9 @@ if(test-path -Path "$($env:TEMP)\tempfile.xml")
 invoke-webrequest -uri $uri -OutFile "$($env:TEMP)\tempfile.xml"
 
 $xmlfile = [xml](get-content "$($env:TEMP)\tempfile.xml")
+
+$namespaces = @{itunes = "http://www.itunes.com/dtds/podcast-1.0.dtd"}
+
 try
 {
     foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
@@ -39,18 +54,6 @@ try
 }
 catch
 {
-    write-output "exception hit $($_.message)"
+    Write-Output $_
      "filepath: $filepath"
-}
-
-function normalizeFilename([string]$filename)
-{
-    $filename = $filename.Replace("|","-")
-    $filename = $filename.Replace("`"","'")
-    $filename = $filename.Replace("\","-")
-    $filename = $filename.Replace("/","-")
-    $filename = $filename.Replace(":","-")
-    $filename = $filename.Replace(">","}")
-    $filename = $filename.Replace("<","{")
-    return $filename
 }
