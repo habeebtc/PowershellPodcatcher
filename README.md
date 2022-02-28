@@ -1,6 +1,8 @@
 # PowershellPodcatcher
 A simple powershell script for downloading podcasts
 
+Written and tested on Windows 10 using Powershell 5.1.  You may have mixed results on other platform/version combinations, but that's why this is open source - so you can take it and adapt it to your needs. 
+
 ## Usage
 
 First you must obtain the RSS feed URL.  The easiest way to do this is via https://podcastaddict.com/
