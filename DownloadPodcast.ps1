@@ -27,7 +27,7 @@ try
 {
     foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
     {
-        
+        #The below check deals with the apple store namespace which if populated puts 2 title records in the xpath results
         if($item.node.title.count -gt 1)
         {
             $filepath = "$outputfolder\$(normalizeFilename($item.node.title[0])).mp3"
