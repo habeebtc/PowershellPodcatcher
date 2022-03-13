@@ -9,10 +9,9 @@ function normalizeFilename([string]$filename)
     $filename = $filename.Replace(":","-")
     $filename = $filename.Replace(">","}")
     $filename = $filename.Replace("<","{")
-    $filename = $filename.Replace
-	#This is the pattern for trimming out unwanted Unicode chars on powershell 5.1
-	$filename = $filename.Replace([char]0x00A0," ")
-	$filename = $filename.Replace("?"," ")
+    #This is the pattern for trimming out unwanted Unicode chars on powershell 5.1
+    $filename = $filename.Replace([char]0x00A0," ")
+    $filename = $filename.Replace("?"," ")
 	
     return $filename
 }
