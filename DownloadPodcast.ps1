@@ -76,7 +76,7 @@ foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
 	}
 	catch
 	{
-		Write-Output $_
+		Write-Host $_ -ForegroundColor Red
 		 "filepath: $filepath"
 		 continue 
 	}
