@@ -6,15 +6,28 @@ function normalizeFilename([string]$filename)
     $filename = $filename.Replace("`"","'")
     $filename = $filename.Replace("\","-")
     $filename = $filename.Replace("/","-")
+	$filename = $filename.Replace("*","-")
     $filename = $filename.Replace(":","-")
     $filename = $filename.Replace(">","}")
     $filename = $filename.Replace("<","{")
+	#Really guys...  https://github.com/PowerShell/PowerShell/issues/3174
+	#Unless we're on Powershell 7.1.something we have to de-grave it after escaping...
+    $filename = $filename.Replace("[","``[")
+    $filename = $filename.Replace("]","``]")
 	#This is the pattern for trimming out unwanted Unicode chars on powershell 5.1
 	$filename = $filename.Replace([char]0x00A0," ")
 	$filename = $filename.Replace("?","")
 	$filename = $filename.Replace("  "," ")
-	
     return $filename.Trim()
+}
+
+function degraveFileName([System.IO.FileSystemInfo]$file)
+{
+	$newfilename = $file.Name
+	$newfilename =$newfilename.Replace("``[","[")
+	$newfilename =$newfilename.Replace("``]","]")
+	write-host "degraving file $newfilename"
+	rename-item -literalpath $file.FullName -newname $newfilename
 }
 
 if(test-path -Path "$($env:TEMP)\tempfile.xml")
@@ -69,14 +82,16 @@ foreach($item in Select-Xml -Xml $xmlfile -XPath "/rss/channel/item")
 				switch($DebugPreference)
 				{
 					'SilentlyContinue' {invoke-webrequest -uri $item.Node.enclosure.url -outfile $filepath}
-					'Continue' {new-item $filepath}
+					'Continue' {new-item -path $filepath}
 				}
+				$file = get-item -literalpath $filepath
+				degraveFileName($file)
 			}
 		}
 	}
 	catch
 	{
-		Write-Host $_ -ForegroundColor Red
+		Write-Output $_
 		 "filepath: $filepath"
 		 continue 
 	}
